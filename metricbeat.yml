@@ -1,0 +1,121 @@
+# some parts taken from: https://github.com/mrduguo/docker-metricbeat/blob/master/metricbeat.yml
+###################### Metricbeat Configuration Example #######################
+
+# This file is an example configuration file highlighting only the most common
+# options. The metricbeat.full.yml file from the same directory contains all the
+# supported options with more comments. You can use it as a reference.
+#
+# You can find the full configuration reference here:
+# https://www.elastic.co/guide/en/beats/metricbeat/index.html
+
+# some filtering taken from here: https://discuss.elastic.co/t/metricbeat-system-module-filtering-tips-and-tricks/71051
+#==========================  Modules configuration ============================
+metricbeat.modules:
+
+#------------------------------- System Module -------------------------------
+- module: system
+  period: 10s
+  metricsets:
+    - cpu
+    - load
+    - fsstat
+    - memory
+    #- core
+    #- socket
+
+- module: system
+  period: 10s
+  metricsets:
+    - network
+  interfaces: [docker0, docker1, eth0, eth1, eth2, eth3, net0, net1, net2, net3]
+
+- module: system
+  period: 10s
+  metricsets:
+    - filesystem
+  filters:
+  - drop_event.when.regexp.mount_point: '^/(sys|cgroup|proc|dev|etc|host|run)($|/)'
+  - drop_event.when.regexp.device_name: '^(shm|nsfs|cgroup|tmpfs|proc|systemd-1|mqueue|sysfs|overlay|devpts)$'
+
+- module: system
+  period: 10s
+  metricsets:
+    - diskio
+  filters:
+    - drop_event.when.regexp.name: '^sr0$'
+
+# disabled by default since produced way too much data
+- module: system
+  enabled: false
+  period: 10s
+  metricsets:
+    - process  
+  processes: ['.*']
+  #process.cgroups.enabled: false
+  filters:
+  - drop_event.when.regexp.name: '^.*(kworker|ksoftirqd|rcu|watchdog|migration|kthread|rcu_sched|systemd|agetty|auditd|sshd|bash|ksmd|lvmetad|scsi|khungtaskd|jbd2|kblockd|bioset|dbus|khelper|kmpath|kintegrityd|khugepaged|fsnotify|ata_sff|LCPDEV|perf|crond|irqbalance|kdevtmpfs|writeback|deferwq|kswapd|kthrotld|kpsmoused|tail|vballoon|polkitd|ttm_swap|syslog|udp_rcv).*'
+  
+- module: docker
+  metricsets: ["container", "cpu", "diskio", "healthcheck", "info", "memory", "network"]
+  hosts: ["unix:///var/run/docker.sock"]
+  enabled: true
+  period: 10s
+
+#================================ General =====================================
+
+# The name of the shipper that publishes the network data. It can be used to group
+# all the transactions sent by a single shipper in the web interface.
+name: metricbeat
+
+# The tags of the shipper are included in their own field with each
+# transaction published.
+#tags: ["service-X", "web-tier"]
+
+# Optional fields that you can specify to add additional information to the
+# output.
+#fields:
+#  env: staging
+
+#================================ Outputs =====================================
+
+# Configure what outputs to use when sending the data collected by the beat.
+# Multiple outputs may be used.
+
+#output.console:
+#  enabled: true
+
+#-------------------------- Elasticsearch output ------------------------------
+#output.elasticsearch:
+  # Array of hosts to connect to.
+  #hosts: ["10.0.1.9:9200"]
+  #template.enabled: false
+  # Optional protocol and basic auth credentials.
+  #protocol: "https"
+  #username: "elastic"
+  #password: "changeme"
+
+#----------------------------- Logstash output --------------------------------
+output.logstash:
+  # The Logstash hosts
+  hosts: [ "filebeats.senexx.com:443" ]
+
+  # Optional SSL. By default is off.
+  # List of root certificates for HTTPS server verifications
+  ssl.certificate_authorities: ["/etc/pki/tls/certs/logstash-forwarder.crt"]
+
+  # Certificate for SSL client authentication
+  ssl.certificate: "/etc/pki/tls/certs/logstash-forwarder.crt"
+
+  # Client Certificate Key
+  ssl.key: "/etc/pki/tls/private/logstash-forwarder.key"
+
+#================================ Logging =====================================
+
+# Sets log level. The default log level is info.
+# Available log levels are: critical, error, warning, info, debug
+#logging.level: debug
+
+# At debug level, you can selectively enable logging only for some components.
+# To enable all selectors use ["*"]. Examples of other selectors are "beat",
+# "publish", "service".
+#logging.selectors: ["*"]

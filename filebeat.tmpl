@@ -1,0 +1,48 @@
+{{/* this is a docker-gen template. See docker-gen for more details */}}
+{{ $nomad_alloc := .Env.NOMAD_ALLOC }}
+filebeat:
+  prospectors:
+  {{ range $key, $value := . }}
+  {{ $nomad_id :=  $value.Env.NOMAD_ALLOC_ID  }}
+    -
+      paths:
+	{{ if $nomad_id }}
+        - {{ $nomad_alloc }}/{{ $nomad_id }}/alloc/logs/{{ $value.Env.NOMAD_TASK_NAME }}.stdout.0
+        - {{ $nomad_alloc }}/{{ $nomad_id }}/alloc/logs/{{ $value.Env.NOMAD_TASK_NAME }}.stderr.0
+        {{ else }}
+        - /var/lib/docker/containers/{{ $value.ID }}/{{ $value.ID }}-json.log
+        {{ end }}
+      document_type: docker
+      ignore_older: 30m
+      scan_frequency: 5s
+      json.keys_under_root: true
+      json.message_key: log
+      fields_under_root: true
+      fields:
+        docker/id: {{ $value.ID }}
+        docker/image: {{ if $value.Image.Registry }}{{ $value.Image.Registry }}/{{ end }}{{ $value.Image.Repository }}{{ if $value.Image.Tag }}:{{ $value.Image.Tag }}{{ else }}:latest{{ end }}
+        docker/name: {{ $value.Name }}
+        {{ if $nomad_id }}docker/task_name: {{ $value.Env.NOMAD_TASK_NAME }}{{end}}
+        docker/hostname: {{ $value.Hostname }}
+        docker/server_host: {{ $.Env.SERVER_HOST }}
+        {{ range $k, $v := $value.Labels }}
+        docker/label/{{ $k }}: {{ $v }}
+        {{ end }}
+  {{ end }}
+
+output.logstash:
+  # The Logstash hosts
+  hosts: [ "{{ .Env.LOGSTASH_HOST }}" ]
+
+  # Optional SSL. By default is off.
+  # List of root certificates for HTTPS server verifications
+  ssl.certificate_authorities: ["/etc/pki/tls/certs/logstash-forwarder.crt"]
+
+  # Certificate for SSL client authentication
+  ssl.certificate: "/etc/pki/tls/certs/logstash-forwarder.crt"
+
+  # Client Certificate Key
+  ssl.key: "/etc/pki/tls/private/logstash-forwarder.key"
+
+logging:
+  level: info
