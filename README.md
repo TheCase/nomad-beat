@@ -9,7 +9,6 @@ Based on http://www.sandtable.com/forwarding-docker-logs-to-logstash/
     ENV LOGSTASH_HOST=filebeat.domain.com:443
     ADD certs/logstash-forwarder.crt /etc/pki/tls/certs/logstash-forwarder.crt
     ADD certs/logstash-forwarder.key /etc/pki/tls/private/logstash-forwarder.key
-    Run nomad job beat.hcl
     ```
 2. Run docker build
 3. Edit beat.hcl with image name
