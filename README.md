@@ -1,4 +1,4 @@
-# Filebeat + Docker-gen
+# Filebeat & MetricBeat with Docker-gen for Hashicorp Nomad
 
 Based on http://www.sandtable.com/forwarding-docker-logs-to-logstash/
 
