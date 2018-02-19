@@ -12,11 +12,11 @@ ENV DOCKERGEN_VERSION=0.7.3
 RUN wget https://github.com/jwilder/docker-gen/releases/download/${DOCKERGEN_VERSION}/docker-gen-linux-amd64-${DOCKERGEN_VERSION}.tar.gz -O- | \
     tar xvz -C /usr/local/bin/ docker-gen
 
-ENV FILEBEAT_VERSION=5.3.0
+ENV FILEBEAT_VERSION=6.2.1
 RUN wget https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-${FILEBEAT_VERSION}-linux-x86_64.tar.gz -O- | \
     tar xvz -C /usr/local/bin/ --strip-components 1 filebeat-${FILEBEAT_VERSION}-linux-x86_64/filebeat
 
-ENV METRICBEAT_VERSION=5.3.0
+ENV METRICBEAT_VERSION=6.2.1
 RUN wget https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-${METRICBEAT_VERSION}-linux-x86_64.tar.gz -O- | \
     tar xvz -C /usr/local/bin/ --strip-components 1 metricbeat-${METRICBEAT_VERSION}-linux-x86_64/metricbeat
 
