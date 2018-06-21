@@ -28,7 +28,7 @@ filebeat:
         {{ range $k, $v := $value.Labels }}
         docker/label/{{ $k }}: {{ $v }}
         {{ end }}
-        {{ if .Env.LOGZIO }}
+        {{ if .Env.LOGZIO_TOKEN }}
         logzio_codec: json
         logzio_token: {{ $.Env.LOGZIO_TOKEN }}
         {{ end }}
@@ -39,7 +39,7 @@ output.logstash:
 
   {{ if .Env.CERT }}
   ssl:
-    certificate_authorities: ["{{ $.Env.CERT }}
+    certificate_authorities: ["{{ $.Env.CERT }}"]
   {{ end }} 
 
 logging:
