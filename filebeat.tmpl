@@ -22,10 +22,10 @@ filebeat:
         docker/id: {{ $value.ID }}
         docker/image: {{ if $value.Image.Registry }}{{ $value.Image.Registry }}/{{ end }}{{ $value.Image.Repository }}{{ if $value.Image.Tag }}:{{ $value.Image.Tag }}{{ else }}:latest{{ end }}
         docker/name: {{ $value.Name }}
-        {{ if .Env.LOGZIO_TOKEN }}
+
         logzio_codec: json
         logzio_token: {{ $.Env.LOGZIO_TOKEN }}
-        {{ end }}
+   
         {{ if $nomad_id }}docker/task_name: {{ $value.Env.NOMAD_TASK_NAME }}{{end}}
         docker/hostname: {{ $value.Hostname }}
         docker/server_host: {{ $.Env.SERVER_HOST }}
